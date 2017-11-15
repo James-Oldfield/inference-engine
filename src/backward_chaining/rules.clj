@@ -20,3 +20,7 @@
     {:numb 6
      :ante [\u \v]
      :cons [\k \i]}))
+
+; initial working memory
+(def wm
+  '(\f \h \d \j \u \v \r \t))
