@@ -9,9 +9,14 @@
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 (defn get-rules-by-cons
   [goal]
-  (filter (fn [rule]
-            (contains? (get rule :cons) goal))
-          rules/base))
+  (let [matching-rules
+        (filter (fn [rule]
+                  (contains? (get rule :cons) goal))
+                rules/base)]
+    (print "-----\n")
+    (print "Matched rules for goal:" goal "-" (map :numb matching-rules))
+    (print "\n-----\n")
+    matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
 (defn fact-in-wm
