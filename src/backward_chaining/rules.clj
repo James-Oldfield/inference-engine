@@ -1,13 +1,13 @@
 (ns backward-chaining.rules)
 
-; ----------------------
-; Modify initial working memory and rule base below:
-; ----------------------
+;; ----------------------
+;; Modify initial working memory and rule base below:
+;; ----------------------
 
-; define seq to store the rulebase
-; :ante - list of symbols as predicates
-; :cons - list of symbols that follow from predicates being true
-; :operator - relationship between 
+;; define seq to store the rulebase
+;; :ante - list of symbols as predicates
+;; :cons - list of symbols that follow from predicates being true
+;; :operator - relationship between 
 (def base
   '({:numb 1
      :ante #{"f h" "a c"}
@@ -34,7 +34,7 @@
      :cons #{"k i"}
      :operator or}))
 
-; initial working memory
+;; initial working memory
 (def wm
   #{"f h"
     "d j"
