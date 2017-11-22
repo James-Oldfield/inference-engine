@@ -19,7 +19,7 @@
     matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
-(defn fact-in-wm
+(defn fact-in-wm?
   [fact]
   (contains? rules/wm fact))
 
