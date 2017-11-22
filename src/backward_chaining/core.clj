@@ -9,7 +9,8 @@
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 (defn get-rules-by-cons
   [goal]
-  (filter #(contains? (get %1 :cons) goal)
+  (filter (fn [rule]
+            (contains? (get rule :cons) goal))
           rules/base))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
