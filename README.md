@@ -35,3 +35,7 @@ lein run "b g"
 # Fact u v in memory? - true
 # Last goal proven - u v => b g
 ```
+
+# todo
+
+- [ ] make use of operators (using `or` implicitly, currently)
