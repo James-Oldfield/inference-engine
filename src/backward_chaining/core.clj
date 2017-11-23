@@ -11,7 +11,7 @@
   [goal]
   (let [matching-rules
         (filter (fn [rule]
-                  (contains? (get rule :cons) goal))
+                  (.contains (get rule :cons) goal))
                 rules/base)]
     (print "\n-----\n")
     (print "Matched rules for goal:" goal "-" (map :numb matching-rules))
@@ -21,7 +21,7 @@
 ;; :return: a boolean specifying whether the goal is in the working memory
 (defn fact-in-wm?
   [fact]
-  (let [fact-in-wm (contains? rules/wm fact)]
+  (let [fact-in-wm (.contains rules/wm fact)]
     (print "Fact" fact "in memory? -" fact-in-wm)
     fact-in-wm))
 
