@@ -28,24 +28,28 @@
   [goal]
   ;; traverse the tree in tail call-recursive manner
   ;; :subgoal - single symbol to be proven
-  ;; :queue   - list of non-immediate symbols to be proven
+  ;; :frontier   - list of non-immediate symbols to be proven
   (loop [subgoal goal
-         queue '()]
+         frontier '()]
 
     ;; If current goal is found, recur with rest of goals
     (if (fact-in-wm? subgoal)
-      (if (empty? queue)
+      (if (empty? frontier)
         (print "\nLast goal proven -" subgoal "=>" goal)
-        (recur (first queue) (rest queue)))
+        (recur (first frontier) (rest frontier)))
 
       ;; bind a single flattened vector of antecedents sufficient for current subgoal.
       ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
       (let [subgoal-queue
             (flatten (map :ante (get-rules-by-cons subgoal)))]
-        (print "\nNew subgoals -" subgoal-queue)
+        (print "\nCurrent subgoals -" subgoal-queue)
+        (print "\nUnexpanded leaf nodes -" frontier)
 
         ;; Recur with next subgoal, depth-first
-        (recur (first subgoal-queue) (rest subgoal-queue))))))
+        (recur (first subgoal-queue)
+               ;; Append the non-expanded frontier (if not empty) to back of queue
+               (concat (if (empty? frontier) nil frontier)
+                       (rest subgoal-queue)))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
