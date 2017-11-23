@@ -54,5 +54,4 @@
 (defn -main
   "Takes a goal and runs it through inference engine"
   [& args]
-  (let [goal "b g"]
-    (prove goal)))
+  (prove (str (first args))))

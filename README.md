@@ -1,36 +1,37 @@
-# backward-chaining
+# inference-engine
 
-FIXME: description
+A simple inference engine for logical implication written in clojure, for coursework.
 
-## Installation
+Tests the truth value of some goal symbol using backward chaining.
 
-Download from http://example.com/FIXME.
+Rule base and working memory can be modified arbitrarily.
 
-## Usage
+## use
 
-FIXME: explanation
+```bash
+usage: lein run [goal]
 
-    $ java -jar backward-chaining-0.1.0-standalone.jar [args]
+where:
+  goal - string - "b h"
+```
 
-## Options
+e.g., prove `"b g"`:
 
-FIXME: listing of options this app accepts.
+```bash
+lein run "b g"
 
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2017 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+# Fact b g in memory? - false
+# 
+# Matched rules for goal: b g - (1)
+# Current subgoals - (f h a c)
+# Unexpanded leaf nodes - ()
+# Fact f h in memory? - true
+# 
+# ...
+# 
+# Matched rules for goal: k i - (6)
+# Current subgoals - (u v)
+# Unexpanded leaf nodes - ()
+# Fact u v in memory? - true
+# Last goal proven - u v => b g
+```
