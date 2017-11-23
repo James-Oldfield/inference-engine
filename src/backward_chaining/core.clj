@@ -7,6 +7,7 @@
 ;; ----------------------
 
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
+;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn get-rules-by-cons
   [goal]
   (let [matching-rules
@@ -25,7 +26,9 @@
 
 (defn prove
   [goal]
-  ;; use tail-call recursion
+  ;; traverse the tree in tail call-recursive manner
+  ;; :subgoal - single symbol to be proven
+  ;; :queue   - list of non-immediate symbols to be proven
   (loop [subgoal goal
          queue '()]
 
@@ -41,10 +44,8 @@
             (flatten (map :ante (get-rules-by-cons subgoal)))]
         (print "\nNew subgoals -" subgoal-queue)
 
-        ;; Recur with next subgoal in depth-first manner, if !empty?
-        (if (empty? subgoal-queue)
-          (print "no reminaing subgoals")
-          (recur (first subgoal-queue) (rest subgoal-queue)))))))
+        ;; Recur with next subgoal, depth-first
+        (recur (first subgoal-queue) (rest subgoal-queue))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
