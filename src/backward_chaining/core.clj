@@ -31,6 +31,7 @@
   ;; traverse the tree in tail call-recursive manner
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
+  ;; :prnts    - list of parent symbols which the subgoal implies
   ;; :wm       - current state of working memory
   (loop [subgoal goal
          frontier []
