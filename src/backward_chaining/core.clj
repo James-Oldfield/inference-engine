@@ -3,8 +3,10 @@
   (:gen-class))
 
 ;; ----------------------
-;; Helper functions to operate on above datastructures
+;; Helper functions to operate on datastructures
 ;; ----------------------
+
+(def not-empty? (complement empty?))
 
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
@@ -29,37 +31,50 @@
   ;; traverse the tree in tail call-recursive manner
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
-  ;; :memory   - current state of working memory
+  ;; :wm       - current state of working memory
   (loop [subgoal goal
-         frontier '()
-         prnts goal
-         memory rules/wm]
+         frontier []
+         prnts []
+         wm rules/wm]
 
-    ;; If current goal is found, recur with next goal in frontier
-    (if (fact-in-wm? subgoal memory)
-      (if (empty? frontier)
-        (print "\nLast goal proven -" subgoal "=>" goal)
-        (recur (first frontier)
-               (rest frontier)
-               (concat prnts subgoal)
-               memory))
+    ;; if frontier is empty, we add parents to working memory,
+    ;; and reset parents' binding to empty list, for next rule
+    (let [memory (if (and (empty? frontier)
+                          (not-empty? prnts))
+                   (concat wm prnts)
+                   wm)
+          prnts (if (empty? frontier)
+                  []
+                  prnts)]
 
-      ;; bind a single flattened vector of antecedents sufficient for current subgoal.
-      ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
-      (let [queue
-            (flatten (map :ante (get-rules-by-cons subgoal)))]
-        (print "\nCurrent subgoals -" queue)
-        (print "\nUnexpanded leaf nodes -" frontier)
+      (print "\nWorking memory -" memory)
+      (print "\nUnexpanded leaf nodes -" frontier)
+      (print "\nparents -" prnts)
 
-        ;; Recur with next subgoal, depth-first, if we have children to prove
-        (if (empty? queue)
-          (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
-          (recur (first queue)
-                 ;; Append the non-expanded frontier (if not empty) to back of queue
-                 (concat (rest queue)
-                         (if (empty? frontier) nil frontier))
+      ;; If current goal is found, recur with next goal in frontier
+      (if (fact-in-wm? subgoal memory)
+        (if (empty? frontier)
+          (print "\nLast goal proven -" subgoal "=>" goal)
+          (recur (first frontier)
+                 (rest frontier)
                  (concat prnts subgoal)
-                 memory))))))
+                 memory))
+
+        ;; bind a single flattened vector of antecedents sufficient for current subgoal.
+        ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
+        (let [queue
+              (flatten (map :ante (get-rules-by-cons subgoal)))]
+          (print "\nNew subgoals -" queue)
+
+          ;; Recur with next subgoal, depth-first, if we have children to prove
+          (if (empty? queue)
+            (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
+            (recur (first queue)
+                   ;; Append the non-expanded frontier (if not empty) to back of queue
+                   (concat (rest queue)
+                           (if (empty? frontier) nil frontier))
+                   (concat prnts subgoal)
+                   memory)))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
