@@ -23,7 +23,7 @@
 (defn fact-in-wm?
   [fact memory]
   (let [fact-in-wm (.contains memory fact)]
-    (print "\nFact" fact "in memory? -" fact-in-wm "\n\n")
+    (print "\nFact" fact "in memory? -" fact-in-wm)
     fact-in-wm))
 
 (defn prove
@@ -49,12 +49,15 @@
     ;; If current goal is found, recur with next goal in frontier
     (if (fact-in-wm? subgoal memory)
       (if (= goal subgoal)
-        (print "GOAL FOUND")
+        (print "\n\n-----GOAL FOUND-----\n\n")
 
-        (recur (first frontier)
+        (recur (if (empty? frontier)
+                 goal
+                 (first frontier))
                (rest frontier)
                (conj prnts subgoal)
                breadth
+               ;; last frontier element being true => all previous facts are true
                (if (empty? frontier)
                  (concat prnts memory)
                  memory)))
