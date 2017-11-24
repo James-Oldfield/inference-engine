@@ -77,9 +77,14 @@
                 (flatten (map :ante (get-rules-by-cons subgoal)))]
             (print "\nNew subgoals -" queue)
 
-            ;; Recur with next subgoal, depth-first, if we have children to prove
+            ;; Recur with next subgoal, depth-first, else expand next leafnode (rule)
             (if (empty? queue)
-              (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
+              ;; back up and expand next node...
+              (recur (first frontier)
+                     (rest frontier)
+                     prnts
+                     memory)
+              ;; prove the children
               (recur (first queue)
                      ;; Append the non-expanded frontier (if not empty) to back of queue
                      (concat (rest queue)
