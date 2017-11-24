@@ -16,14 +16,14 @@
         (filter (fn [rule]
                   (.contains (get rule :cons) goal))
                 rules/base)]
-    (print "\n\nMatched rules for goal:" goal "-" (map :numb matching-rules))
+    (print "Matched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
 (defn fact-in-wm?
   [fact memory]
   (let [fact-in-wm (.contains memory fact)]
-    (print "\nFact" fact "in memory? -" fact-in-wm)
+    (print "\nFact" fact "in memory? -" fact-in-wm "\n\n")
     fact-in-wm))
 
 (defn prove
@@ -48,6 +48,7 @@
                   []
                   prnts)]
 
+      (print "\nCurrent subgoal -" subgoal)
       (print "\nWorking memory -" memory)
       (print "\nUnexpanded leaf nodes -" frontier)
       (print "\nparents -" prnts)
