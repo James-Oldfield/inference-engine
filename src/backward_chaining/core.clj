@@ -16,7 +16,7 @@
         (filter (fn [rule]
                   (.contains (get rule :cons) goal))
                 rules/base)]
-    (print "Matched rules for goal:" goal "-" (map :numb matching-rules))
+    (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
@@ -41,58 +41,52 @@
   (loop [subgoal goal
          frontier []
          prnts []
-         wm rules/wm]
+         breadth 0
+         memory rules/wm]
 
-    ;; if frontier is empty, we add parents to working memory,
-    ;; and reset parents' binding to empty list, for next rule
-    (let [memory (if (and (empty? frontier)
-                          (not-empty? prnts))
-                   (concat wm prnts)
-                   wm)
-          prnts (if (empty? frontier)
-                  []
-                  prnts)]
-
-      (print "Current subgoal -" subgoal)
+      (print "\n\nCurrent subgoal -" subgoal)
       (print "\nWorking memory -" memory)
       (print "\nUnexpanded leaf nodes -" frontier)
       (print "\nparents -" prnts)
+      (print "\nbreadth -" breadth)
 
       ;; Have we cleared out a current branch?
       ;; if so, check if we've satisfied goal before we continue with more rules
-      (if (and (every? empty? [prnts frontier])
-               (not= goal subgoal))
-        (check-for-goal goal memory)
+      ; (if (and (every? empty? [prnts frontier])
+      ;          (not= goal subgoal))
+      ;   (check-for-goal goal memory)
 
-        ;; If current goal is found, recur with next goal in frontier
-        (if (fact-in-wm? subgoal memory)
-          (recur (first frontier)
-                 (rest frontier)
-                 (conj prnts subgoal)
-                 memory)
+      ;; If current goal is found, recur with next goal in frontier
+      (if (fact-in-wm? subgoal memory)
+        (recur (first frontier)
+               (rest frontier)
+               (conj prnts subgoal)
+               breadth
+               memory)
 
-          ;; bind a single flattened vector of antecedents sufficient for current subgoal.
-          ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
-          (let [queue
-                (flatten (map :ante (get-rules-by-cons subgoal)))]
-            (print "\nNew subgoals -" queue)
+        ;; get a list of this breadth's antecedents for new subgoals
+        (let [queue
+              (let [rules (get-rules-by-cons subgoal)]
+                (if (< breadth (count rules))
+                  (:ante (nth rules breadth))
+                  []))]
+          (print "\nNew subgoals -" queue)
 
-            ;; Recur with next subgoal, depth-first, else expand next leafnode (rule)
-            (if (empty? queue)
-              ;; back up and expand next node...
-              (recur (first frontier)
-                     (rest frontier)
-                     prnts
-                     memory)
-              ;; prove the children
-              (recur (first queue)
-                     ;; Append the non-expanded frontier (if not empty) to back of queue
-                     (concat (rest queue)
-                             (if (empty? frontier) nil frontier))
-                     (conj prnts subgoal)
-                     memory))))))))
+          ;; Recur with next subgoal, depth-first, if we have children to prove
+          (if (empty? queue)
+            (if (> breadth (count (get-rules-by-cons subgoal)))
+              (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
+              (recur goal [] [] (inc breadth) memory))
+            (recur (first queue)
+                   ;; Append the non-expanded frontier (if not empty) to back of queue
+                   (concat (rest queue)
+                           (if (empty? frontier) nil frontier))
+                   (conj prnts subgoal)
+                   breadth
+                   memory))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
   [& args]
   (prove (str (first args))))
+
