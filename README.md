@@ -38,5 +38,5 @@ lein run "b g"
 
 # todo
 
+- [x] add facts to working memory to prevent rules firing twice
 - [ ] make use of operators (using `or` implicitly, currently)
-- [ ] add facts to working memory to prevent rules firing twice
