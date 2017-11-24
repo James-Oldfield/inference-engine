@@ -51,6 +51,7 @@
       (if (= goal subgoal)
         (print "\n\n-----GOAL FOUND-----\n\n")
 
+        ;; if frontier is empty, backtrack to root node
         (recur (if (empty? frontier)
                  goal
                  (first frontier))
@@ -58,6 +59,7 @@
                (conj prnts subgoal)
                breadth
                ;; last frontier element being true => all previous facts are true
+               ;; so append them to the memory
                (if (empty? frontier)
                  (concat prnts memory)
                  memory)))
