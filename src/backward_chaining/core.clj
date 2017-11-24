@@ -32,6 +32,7 @@
   ;; :memory   - current state of working memory
   (loop [subgoal goal
          frontier '()
+         prnts goal
          memory rules/wm]
 
     ;; If current goal is found, recur with next goal in frontier
@@ -40,6 +41,7 @@
         (print "\nLast goal proven -" subgoal "=>" goal)
         (recur (first frontier)
                (rest frontier)
+               (concat prnts subgoal)
                memory))
 
       ;; bind a single flattened vector of antecedents sufficient for current subgoal.
@@ -56,6 +58,7 @@
                  ;; Append the non-expanded frontier (if not empty) to back of queue
                  (concat (rest queue)
                          (if (empty? frontier) nil frontier))
+                 (concat prnts subgoal)
                  memory))))))
 
 (defn -main
