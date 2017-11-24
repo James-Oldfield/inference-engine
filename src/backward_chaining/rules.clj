@@ -9,7 +9,23 @@
 ;; :cons - list of symbols that follow from predicates being true
 ;; :operator - relationship between 
 (def base
-  '({:numb 1
+  '(
+    ;; Test dead end rules
+    {:numb 100
+     :ante ["x x"]
+     :cons ["b g"]
+     :operator or}
+    {:numb 101
+     :ante ["y y"]
+     :cons ["x x"]
+     :operator or}
+    {:numb 102
+     :ante ["z z"]
+     :cons ["y y"]
+     :operator or}
+    ;; End Test dead end rules
+
+    {:numb 1
      :ante ["f h" "a c"]
      :cons ["b g"]
      :operator or}
