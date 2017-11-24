@@ -40,7 +40,7 @@
         (print "\nLast goal proven -" subgoal "=>" goal)
         (recur (first frontier)
                (rest frontier)
-               rules/wm))
+               memory))
 
       ;; bind a single flattened vector of antecedents sufficient for current subgoal.
       ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
@@ -54,9 +54,9 @@
           (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
           (recur (first queue)
                  ;; Append the non-expanded frontier (if not empty) to back of queue
-                 (concat (if (empty? frontier) nil frontier)
-                         (rest queue))
-                 rules/wm))))))
+                 (concat (rest queue)
+                         (if (empty? frontier) nil frontier))
+                 memory))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
