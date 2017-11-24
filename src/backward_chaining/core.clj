@@ -11,12 +11,12 @@
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn get-rules-by-cons
-  [goal]
+  [goal log?]
   (let [matching-rules
         (filter (fn [rule]
                   (.contains (get rule :cons) goal))
                 rules/base)]
-    (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
+    (and log? (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules)))
     matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
@@ -47,8 +47,8 @@
       (print "\n\nCurrent subgoal -" subgoal)
       (print "\nWorking memory -" memory)
       (print "\nUnexpanded leaf nodes -" frontier)
-      (print "\nparents -" prnts)
-      (print "\nbreadth -" breadth)
+      (print "\nParent nodes -" prnts)
+      (print "\nBreadth of search -" (inc breadth))
 
       ;; Have we cleared out a current branch?
       ;; if so, check if we've satisfied goal before we continue with more rules
@@ -66,7 +66,7 @@
 
         ;; get a list of this breadth's antecedents for new subgoals
         (let [queue
-              (let [rules (get-rules-by-cons subgoal)]
+              (let [rules (get-rules-by-cons subgoal true)]
                 (if (< breadth (count rules))
                   (:ante (nth rules breadth))
                   []))]
@@ -74,7 +74,7 @@
 
           ;; Recur with next subgoal, depth-first, if we have children to prove
           (if (empty? queue)
-            (if (> breadth (count (get-rules-by-cons subgoal)))
+            (if (> breadth (count (get-rules-by-cons subgoal false)))
               (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
               (recur goal [] [] (inc breadth) memory))
             (recur (first queue)
