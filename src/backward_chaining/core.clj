@@ -26,6 +26,11 @@
     (print "\nFact" fact "in memory? -" fact-in-wm "\n\n")
     fact-in-wm))
 
+(defn check-for-goal
+  [goal memory]
+  (if (fact-in-wm? goal memory)
+    (print "GOAL FOUND")))
+
 (defn prove
   [goal]
   ;; traverse the tree in tail call-recursive manner
@@ -53,14 +58,17 @@
       (print "\nUnexpanded leaf nodes -" frontier)
       (print "\nparents -" prnts)
 
+      ;; Have we cleared out a current branch?
+      ;; if we, check if we've satisfied goal
+      (if (every? empty? [prnts frontier])
+        (check-for-goal goal memory))
+
       ;; If current goal is found, recur with next goal in frontier
       (if (fact-in-wm? subgoal memory)
-        (if (empty? frontier)
-          (print "\nLast goal proven -" subgoal "=>" goal)
-          (recur (first frontier)
-                 (rest frontier)
-                 (conj prnts subgoal)
-                 memory))
+        (recur (first frontier)
+               (rest frontier)
+               (conj prnts subgoal)
+               memory)
 
         ;; bind a single flattened vector of antecedents sufficient for current subgoal.
         ;; i.e. single vec of antecedents of every rule with subgoal as consequent.
