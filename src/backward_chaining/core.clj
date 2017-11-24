@@ -26,11 +26,6 @@
     (print "\nFact" fact "in memory? -" fact-in-wm "\n\n")
     fact-in-wm))
 
-(defn check-for-goal
-  [goal memory]
-   (if (fact-in-wm? goal memory)
-     (print "GOAL FOUND")))
-
 (defn prove
   [goal]
   ;; traverse the tree in tail call-recursive manner
@@ -44,46 +39,46 @@
          breadth 0
          memory rules/wm]
 
-      (print "\n\nCurrent subgoal -" subgoal)
-      (print "\nWorking memory -" memory)
-      (print "\nUnexpanded leaf nodes -" frontier)
-      (print "\nParent nodes -" prnts)
-      (print "\nBreadth of search -" (inc breadth))
+    (print "\n\nCurrent subgoal -" subgoal)
+    (print "\nWorking memory -" memory)
+    (print "\nFrontier -" frontier)
+    (print "\nParent nodes -" prnts)
+    (print "\nBreadth of search -" breadth)
 
-      ;; Have we cleared out a current branch?
-      ;; if so, check if we've satisfied goal before we continue with more rules
-      ; (if (and (every? empty? [prnts frontier])
-      ;          (not= goal subgoal))
-      ;   (check-for-goal goal memory)
-
-      ;; If current goal is found, recur with next goal in frontier
-      (if (fact-in-wm? subgoal memory)
+    ;; If current goal is found, recur with next goal in frontier
+    (if (fact-in-wm? subgoal memory)
+      (if (= goal subgoal)
+        (print "GOAL FOUND")
         (recur (first frontier)
                (rest frontier)
                (conj prnts subgoal)
                breadth
-               memory)
+               (if (empty? frontier)
+                 (concat prnts memory)
+                 memory)))
 
-        ;; get a list of this breadth's antecedents for new subgoals
-        (let [queue
-              (let [rules (get-rules-by-cons subgoal true)]
-                (if (< breadth (count rules))
-                  (:ante (nth rules breadth))
-                  []))]
-          (print "\nNew subgoals -" queue)
+      ;; get a list of this breadth's antecedents for new subgoals
+      ;; or if we're not at root, use 0 (no sub-depths implenented (yet?))
+      (let [breadth (if (= goal subgoal) breadth 0)
+            queue
+            (let [rules (get-rules-by-cons subgoal true)]
+              (if (< breadth (count rules))
+                (:ante (nth rules breadth))
+                []))]
+        (print "\nNew subgoals -" queue)
 
-          ;; Recur with next subgoal, depth-first, if we have children to prove
-          (if (empty? queue)
-            (if (> breadth (count (get-rules-by-cons subgoal false)))
-              (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
-              (recur goal [] [] (inc breadth) memory))
-            (recur (first queue)
-                   ;; Append the non-expanded frontier (if not empty) to back of queue
-                   (concat (rest queue)
-                           (if (empty? frontier) nil frontier))
-                   (conj prnts subgoal)
-                   breadth
-                   memory))))))
+        ;; Recur with next subgoal, depth-first, if we have children to prove
+        (if (empty? queue)
+          (if (> breadth (count (get-rules-by-cons subgoal false)))
+            (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
+            (recur goal [] [] (inc breadth) memory))
+          (recur (first queue)
+                 ;; Append the non-expanded frontier (if not empty) to back of queue
+                 (concat (rest queue)
+                         (if (empty? frontier) nil frontier))
+                 (conj prnts subgoal)
+                 breadth
+                 memory))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
