@@ -59,7 +59,7 @@
       (print "\nparents -" prnts)
 
       ;; Have we cleared out a current branch?
-      ;; if so, check if we've satisfied goal
+      ;; if so, check if we've satisfied goal before we continue with more rules
       (if (and (every? empty? [prnts frontier])
                (not= goal subgoal))
         (check-for-goal goal memory)
