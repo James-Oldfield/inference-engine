@@ -32,6 +32,7 @@
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
   ;; :prnts    - list of parent symbols which the subgoal implies
+  ;; :breadth  - breadth of root node search
   ;; :wm       - current state of working memory
   (loop [subgoal goal
          frontier []
@@ -49,6 +50,7 @@
     (if (fact-in-wm? subgoal memory)
       (if (= goal subgoal)
         (print "GOAL FOUND")
+
         (recur (first frontier)
                (rest frontier)
                (conj prnts subgoal)
@@ -60,22 +62,22 @@
       ;; get a list of this breadth's antecedents for new subgoals
       ;; or if we're not at root, use 0 (no sub-depths implenented (yet?))
       (let [breadth (if (= goal subgoal) breadth 0)
-            queue
-            (let [rules (get-rules-by-cons subgoal true)]
-              (if (< breadth (count rules))
-                (:ante (nth rules breadth))
-                []))]
+            queue (let [rules (get-rules-by-cons subgoal true)]
+                    (if (< breadth (count rules))
+                      (:ante (nth rules breadth))
+                      []))]
+
         (print "\nNew subgoals -" queue)
 
-        ;; Recur with next subgoal, depth-first, if we have children to prove
         (if (empty? queue)
           (if (> breadth (count (get-rules-by-cons subgoal false)))
+            ;; if we have more rules, recur, increasing the breadth (next rule from root)
             (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
             (recur goal [] [] (inc breadth) memory))
+
+          ;; else carry on picking facts off this branch
           (recur (first queue)
-                 ;; Append the non-expanded frontier (if not empty) to back of queue
-                 (concat (rest queue)
-                         (if (empty? frontier) nil frontier))
+                 (concat (rest queue) frontier)
                  (conj prnts subgoal)
                  breadth
                  memory))))))
