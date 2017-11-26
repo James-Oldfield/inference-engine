@@ -8,13 +8,15 @@
 
 (def not-empty? (complement empty?))
 
-;; :return: a lazySeq of rules whose consequents contain the goal symbol
+;; :return: a lazySeq of rules whose consequents contain the goal symbol,
+;; and that aren't present in `visited` seq
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn get-rules-by-cons
-  [goal log?]
+  [goal visited log?]
   (let [matching-rules
         (filter (fn [rule]
-                  (.contains (get rule :cons) goal))
+                  (and (.contains (get rule :cons) goal)
+                       (not (.contains visited (get rule :numb)))))
                 rules/base)]
     (and log? (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules)))
     matching-rules))
