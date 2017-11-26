@@ -34,19 +34,18 @@
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
   ;; :prnts    - list of parent symbols which the subgoal implies
-  ;; :breadth  - breadth of root node search
+  ;; :visited  - already-traversed rules
   ;; :wm       - current state of working memory
   (loop [subgoal goal
          frontier []
          prnts []
-         breadth 0
+         visited []
          memory rules/wm]
 
     (print "\n\nCurrent subgoal -" subgoal)
     (print "\nWorking memory -" memory)
-    (print "\nFrontier -" frontier)
     (print "\nParent nodes -" prnts)
-    (print "\nBreadth of search -" breadth)
+    (print "\nVisited -" visited)
 
     ;; If current goal is found, recur with next goal in frontier
     (if (fact-in-wm? subgoal memory)
@@ -59,34 +58,36 @@
                  (first frontier))
                (rest frontier)
                (conj prnts subgoal)
-               breadth
+               visited
                ;; last frontier element being true => all previous facts are true
                ;; so append them to the memory
                (if (empty? frontier)
                  (concat prnts memory)
                  memory)))
 
-      ;; get a list of this breadth's antecedents for new subgoals
-      ;; or if we're not at root, use 0 (no sub-depths implenented (yet?))
-      (let [breadth (if (= goal subgoal) breadth 0)
-            queue (let [rules (get-rules-by-cons subgoal true)]
-                    (if (< breadth (count rules))
-                      (:ante (nth rules breadth))
-                      []))]
+      (let [rules (get-rules-by-cons subgoal visited false)
+            queue (flatten (conj (first (map :ante rules)) frontier))
+            rule-number (first (map :numb rules))]
 
-        (print "\nNew subgoals -" queue)
+        (print "\nQueue -" queue)
 
         (if (empty? queue)
-          (if (> breadth (count (get-rules-by-cons subgoal false)))
-            ;; if we have more rules, recur, increasing the breadth (next rule from root)
-            (print "\nFailed to find" subgoal "in any rule's consequents. Perhaps add more rules?")
-            (recur goal [] [] (inc breadth) memory))
+          (if (= goal subgoal)
+            (print "\nNo more rules found for goal =>" goal "is not true.")
+            ;; If we're not at root node, backtrack to last element of parent nodes
+            (recur (last prnts)
+                   []
+                   (butlast prnts)
+                   visited
+                   memory))
 
           ;; else carry on picking facts off this branch
           (recur (first queue)
-                 (concat (rest queue) frontier)
+                 (rest queue)
                  (conj prnts subgoal)
-                 breadth
+                 (if (number? rule-number)
+                   (conj visited rule-number)
+                   visited)
                  memory))))))
 
 (defn -main
