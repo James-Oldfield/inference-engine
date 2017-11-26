@@ -34,7 +34,7 @@
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
   ;; :prnts    - list of parent symbols which the subgoal implies
-  ;; :visited  - already-traversed rules
+  ;; :visited  - already-traversed rule numbers
   ;; :wm       - current state of working memory
   (loop [subgoal goal
          frontier []
@@ -59,7 +59,7 @@
                (rest frontier)
                (conj prnts subgoal)
                visited
-               ;; last frontier element being true => all previous facts are true
+               ;; last frontier element being true => all parent facts are true
                ;; so append them to the memory
                (if (empty? frontier)
                  (concat prnts memory)
