@@ -62,7 +62,7 @@
                ;; last frontier element being true => all parent facts are true
                ;; so append them to the memory
                (if (empty? frontier)
-                 (concat prnts memory)
+                 (seq (set (concat prnts memory)))
                  memory)))
 
       (let [rules (get-rules-by-cons subgoal visited false)
