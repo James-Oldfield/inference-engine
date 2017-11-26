@@ -12,7 +12,7 @@
   '(
     ;; Test dead end rules
     {:numb 100
-     :ante ["x x"]
+     :ante ["x x" "l l"]
      :cons ["b g"]
      :operator or}
     {:numb 101
