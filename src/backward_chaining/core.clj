@@ -12,13 +12,13 @@
 ;; and that aren't present in `visited` seq
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn get-rules-by-cons
-  [goal visited log?]
+  [goal visited]
   (let [matching-rules
         (filter (fn [rule]
                   (and (.contains (get rule :cons) goal)
                        (not (.contains visited (get rule :numb)))))
                 rules/base)]
-    (and log? (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules)))
+    (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
@@ -65,7 +65,7 @@
                  (seq (set (concat prnts memory)))
                  memory)))
 
-      (let [rules (get-rules-by-cons subgoal visited false)
+      (let [rules (get-rules-by-cons subgoal visited)
             queue (flatten (conj (first (map :ante rules)) frontier))
             rule-number (first (map :numb rules))]
 
