@@ -33,7 +33,7 @@
   ;; :subgoal  - single symbol to be proven
   ;; :frontier - list of non-immediate symbols to be proven
   ;; :prnts    - list of parent symbols which the subgoal implies
-  ;; :visited  - already-traversed rule numbers
+  ;; :visited  - already-traversed nodes
   ;; :wm       - current state of working memory
   (loop [subgoal goal
          frontier []
@@ -44,29 +44,27 @@
     (print "\n\nCurrent subgoal -" subgoal)
     (print "\nWorking memory -" memory)
     (print "\nParent nodes -" prnts)
-    (print "\nVisited -" visited)
+    (print "\nVisited -" (set visited))
+    (print "\nFrontier" frontier)
 
     ;; If current goal is found, recur with next goal in frontier
     (if (fact-in-wm? subgoal memory)
       (if (= goal subgoal)
         (print "\n\n-----GOAL FOUND-----\n\n")
 
-        ;; if frontier is empty, backtrack to root node
-        (recur (if (empty? frontier)
-                 goal
-                 (first frontier))
-               (rest frontier)
-               (conj prnts subgoal)
-               visited
-               ;; last frontier element being true => all parent facts are true
-               ;; so append them to the memory
+        (recur (if (empty? frontier)  ;; if frontier is empty, backtrack to root node
+                 goal                 ;; i.e `goal` is new subgoal
+                 (first frontier))    ;; else expand next leaf node
+               (rest frontier)        ;; rest of the frontier is kept the same
+               (conj prnts subgoal)   ;; old subgoal is a new parent of new subgoal
+               (conj visited subgoal) ;; we've also now 'visited' `subgoal`
                (if (empty? frontier)
-                 (seq (set (concat prnts memory)))
+                 (seq (set (concat prnts memory))) ;; last frontier element being true => all parent facts are true so append them to the memory
                  memory)))
 
-      (let [rules (get-rules-by-cons subgoal visited)
-            queue (flatten (conj (first (map :ante rules)) frontier))
-            rule-number (first (map :numb rules))]
+      (let [rules (get-rules-by-cons subgoal)                                ;; get all rules concerning this subgoal
+            antecedents (flatten (map :ante rules))                          ;; map the rules to relevant antecedents
+            queue (filter (fn [a] (not (.contains visited a))) antecedents)] ;; get the antecedents of matching rules that we *haven't* visited
 
         (print "\nQueue -" queue)
 
@@ -74,17 +72,17 @@
           (if (= goal subgoal)
             (print "\nNo more rules found for goal =>" goal "is not true.")
             ;; If we're not at root node, backtrack to last element of parent nodes
-            (recur (last prnts)
-                   []
-                   (butlast prnts)
-                   (conj visited subgoal)
+            (recur (last prnts)           ;; Start backtracking—most recent parent
+                   []                     ;; Reset frontier
+                   (butlast prnts)        ;; Remove new subgoal from parents
+                   (conj visited subgoal) ;; we've also now visited this `subgoal`
                    memory))
 
           ;; else carry on picking facts off this branch
-          (recur (first queue)
-                 (rest queue)
-                 (conj prnts subgoal)
-                 (conj visited subgoal)
+          (recur (first queue)                          ;; take top of queue as new subgoal
+                 (flatten (conj frontier (rest queue))) ;; queue takes priority over frontier, as depth first
+                 (conj prnts subgoal)                   ;; subgoal is now the most recent parent
+                 (conj visited subgoal)                 ;; we've also now visisted `subgoal`
                  memory))))))
 
 (defn -main
