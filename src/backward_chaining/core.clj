@@ -77,16 +77,14 @@
             (recur (last prnts)
                    []
                    (butlast prnts)
-                   visited
+                   (conj visited subgoal)
                    memory))
 
           ;; else carry on picking facts off this branch
           (recur (first queue)
                  (rest queue)
                  (conj prnts subgoal)
-                 (if (number? rule-number)
-                   (conj visited rule-number)
-                   visited)
+                 (conj visited subgoal)
                  memory))))))
 
 (defn -main
