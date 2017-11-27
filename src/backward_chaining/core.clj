@@ -12,11 +12,10 @@
 ;; and that aren't present in `visited` seq
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn get-rules-by-cons
-  [goal visited]
+  [goal]
   (let [matching-rules
         (filter (fn [rule]
-                  (and (.contains (get rule :cons) goal)
-                       (not (.contains visited (get rule :numb)))))
+                  (.contains (get rule :cons) goal))
                 rules/base)]
     (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
