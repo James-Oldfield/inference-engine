@@ -8,8 +8,7 @@
 
 (def not-empty? (complement empty?))
 
-;; :return: a lazySeq of rules whose consequents contain the goal symbol,
-;; and that aren't present in `visited` seq
+;; :return: a lazySeq of rules whose consequents contain the goal symbol
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
 (defn match
   [goal]
@@ -19,6 +18,13 @@
                 rules/base)]
     (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
+
+;; filter the matched rules' antecedents if they've already been visited
+(defn select
+  [antecedents visited]
+  (filter (fn [a]
+            (not (.contains visited a)))
+          antecedents))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
 (defn fact-in-wm?
@@ -47,7 +53,7 @@
     (print "\nVisited -" (set visited))
     (print "\nFrontier" frontier)
 
-    ;; If current goal is found, recur with next goal in frontier
+    ;; If current subgoal is found in memory, recur with next goal in frontier as new subgoal
     (if (fact-in-wm? subgoal memory)
       (if (= goal subgoal)
         (print "\n\n-----GOAL FOUND-----\n\n")
@@ -62,9 +68,9 @@
                  (seq (set (concat prnts memory))) ;; last frontier element being true => all parent facts are true so append them to the memory
                  memory)))
 
-      (let [rules (match subgoal)                                            ;; get all rules concerning this subgoal
-            antecedents (flatten (map :ante rules))                          ;; map the rules to relevant antecedents
-            queue (filter (fn [a] (not (.contains visited a))) antecedents)] ;; get the antecedents of matching rules that we *haven't* visited
+      (let [rules (match subgoal)                   ;; get all rules concerning this subgoal
+            antecedents (flatten (map :ante rules)) ;; map the rules to relevant antecedents
+            queue (select antecedents visited)]     ;; get the antecedents of matching rules that we *haven't* visited
 
         (print "\nQueue -" queue)
 
