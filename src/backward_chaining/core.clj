@@ -14,12 +14,13 @@
   [goal]
   (let [matching-rules
         (filter (fn [rule]
-                  (.contains (get rule :cons) goal))
+                  (= (get rule :cons) goal))
                 rules/base)]
     (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
 
-;; filter the matched rules' antecedents if they've already been visited
+;; filter the matched rules' antecedents if they're contained in `visited` collection
+;; this becomes our new frontier we expand in either depth/breadth-first manner
 (defn select
   [antecedents visited]
   (filter (fn [a]
@@ -68,9 +69,9 @@
                  (seq (set (concat prnts memory))) ;; last frontier element being true => all parent facts are true so append them to the memory
                  memory)))
 
-      (let [rules (match subgoal)                   ;; get all rules concerning this subgoal
-            antecedents (flatten (map :ante rules)) ;; map the rules to relevant antecedents
-            queue (select antecedents visited)]     ;; get the antecedents of matching rules that we *haven't* visited
+      (let [rules (match subgoal)                        ;; get all rules concerning this subgoal
+            antecedents (apply concat (map :ante rules)) ;; map the rules to relevant antecedents
+            queue (select antecedents visited)]          ;; get the antecedents of matching rules that we *haven't* visited
 
         (print "\nQueue -" queue)
 
@@ -85,14 +86,13 @@
                    memory))
 
           ;; else carry on picking facts off this branch
-          (recur (first queue)                          ;; take top of queue as new subgoal
-                 (flatten (conj frontier (rest queue))) ;; queue takes priority over frontier, as depth first
-                 (conj prnts subgoal)                   ;; subgoal is now the most recent parent
-                 (conj visited subgoal)                 ;; we've also now visisted `subgoal`
+          (recur (first queue)                  ;; take top of queue as new subgoal
+                 (concat frontier (rest queue)) ;; queue takes priority over frontier, as depth first
+                 (conj prnts subgoal)           ;; subgoal is now the most recent parent
+                 (conj visited subgoal)         ;; we've also now visisted `subgoal`
                  memory))))))
 
 (defn -main
   "Takes a goal and runs it through inference engine"
   [& args]
-  (prove (str (first args))))
-
+  (prove [\b \g]))
