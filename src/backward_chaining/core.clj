@@ -6,7 +6,13 @@
 ;; Helper functions to operate on datastructures
 ;; ----------------------
 
+;; complement of empty
 (def not-empty? (complement empty?))
+
+;; parses ints as chars, useful when printing to display progress
+(defn intvec-to-char
+  [v]
+  (partition 2 (map char (flatten v))))
 
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
@@ -16,7 +22,7 @@
         (filter (fn [rule]
                   (= (get rule :cons) goal))
                 rules/as-ints)]
-    (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
+    (print "\nMatched rules for goal:" (intvec-to-char goal) "-" (map :numb matching-rules))
     matching-rules))
 
 ;; filter the matched rules' antecedents if they're contained in `visited` collection
@@ -31,7 +37,7 @@
 (defn fact-in-wm?
   [fact memory]
   (let [fact-in-wm (.contains memory fact)]
-    (print "\nFact" fact "in memory? -" fact-in-wm)
+    (print "\nFact" (intvec-to-char fact) "in memory? -" fact-in-wm)
     fact-in-wm))
 
 (defn prove
@@ -48,11 +54,11 @@
          visited []
          memory rules/wm-as-int]
 
-    (print "\n\nCurrent subgoal -" subgoal)
-    (print "\nWorking memory -" memory)
-    (print "\nParent nodes -" prnts)
-    (print "\nVisited -" (set visited))
-    (print "\nFrontier" frontier)
+    (print "\n\nCurrent subgoal -" (intvec-to-char subgoal))
+    (print "\nWorking memory -" (intvec-to-char memory))
+    (print "\nParent nodes -" (intvec-to-char prnts))
+    (print "\nVisited -" (intvec-to-char (set visited)))
+    (print "\nFrontier" (intvec-to-char frontier))
 
     ;; If current subgoal is found in memory, recur with next goal in frontier as new subgoal
     (if (fact-in-wm? subgoal memory)
@@ -73,7 +79,7 @@
             antecedents (apply concat (map :ante rules)) ;; map the rules to relevant antecedents
             queue (select antecedents visited)]          ;; get the antecedents of matching rules that we *haven't* visited
 
-        (print "\nQueue -" queue)
+        (print "\nQueue -" (intvec-to-char queue))
 
         (if (empty? queue)
           (if (= goal subgoal)
