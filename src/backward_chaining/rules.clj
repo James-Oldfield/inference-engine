@@ -65,16 +65,16 @@
 (defn cons-to-int
   [rs]
   (map (fn [rule]
-         (update rule :cons (fn [c] (map int c)))
-         ) rs))
+         (update rule :cons (fn [c] (map int c))))
+       rs))
 
 ;; maps antecedents of rules to int format
 ;; :return: the rules
 (defn ants-to-int
   [rs]
   (map (fn [rule]
-         (update rule :ante (fn [a] (partition 2 (map int (flatten a)))))
-         ) rs))
+         (update rule :ante (fn [a] (partition 2 (map int (flatten a))))))
+       rs))
 
 ;; Parse rules as integers for more efficient comparison
 (def as-ints (cons-to-int
