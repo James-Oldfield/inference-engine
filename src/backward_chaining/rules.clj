@@ -44,27 +44,27 @@
     {:numb 1
      :ante [[\f \h] [\a \c]]
      :cons [\b \g]
-     :operator or}
+     :operator and}
     {:numb 2
      :ante [[\n \s]]
      :cons [\e \m]
-     :operator or}
+     :operator and}
     {:numb 3
      :ante [[\r \t]]
      :cons [\p \q]
-     :operator or}
+     :operator and}
     {:numb 4
      :ante [[\d \j] [\e \m] [\k \i]]
      :cons [\a \c]
-     :operator or}
+     :operator and}
     {:numb 5
      :ante [[\p \q]]
      :cons [\n \s]
-     :operator or}
+     :operator and}
     {:numb 6
      :ante [[\u \v]]
      :cons [\k \i]
-     :operator or}))
+     :operator and}))
 
 ;; initial working memory
 (def wm

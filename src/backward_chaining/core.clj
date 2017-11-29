@@ -79,7 +79,7 @@
             antecedents (apply concat (map :ante rules)) ;; map the rules to relevant antecedents
             queue (select antecedents visited)]          ;; get the antecedents of matching rules that we *haven't* visited
 
-        (print "\nQueue -" (intvec-to-char queue))
+        (print "\nNew queue for expanded leaf node -" (intvec-to-char queue))
 
         (if (empty? queue)
           (if (= goal subgoal)
