@@ -57,6 +57,9 @@
    [\u \v]
    [\r \t]])
 
+(def wm-as-int
+  (partition 2 (map int (flatten wm))))
+
 ;; maps consequents of rules to int format
 ;; :return: the rules
 (defn cons-to-int

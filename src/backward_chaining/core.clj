@@ -15,7 +15,7 @@
   (let [matching-rules
         (filter (fn [rule]
                   (= (get rule :cons) goal))
-                rules/base)]
+                rules/as-ints)]
     (print "\nMatched rules for goal:" goal "-" (map :numb matching-rules))
     matching-rules))
 
@@ -46,7 +46,7 @@
          frontier []
          prnts []
          visited []
-         memory rules/wm]
+         memory rules/wm-as-int]
 
     (print "\n\nCurrent subgoal -" subgoal)
     (print "\nWorking memory -" memory)
@@ -95,4 +95,4 @@
 (defn -main
   "Takes a goal and runs it through inference engine"
   [& args]
-  (prove [\b \g]))
+  (prove (map int [\b \g])))
