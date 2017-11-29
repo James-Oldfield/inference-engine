@@ -26,15 +26,15 @@
     ;; End Test dead end rules
 
     {:numb 1
-     :ante [[\f \h] [\a \c] []]
+     :ante [[\f \h] [\a \c]]
      :cons [\b \g]
      :operator or}
     {:numb 2
-     :ante [[\n \s] [] []]
+     :ante [[\n \s]]
      :cons [\e \m]
      :operator or}
     {:numb 3
-     :ante [[\r \t] [] []]
+     :ante [[\r \t]]
      :cons [\p \q]
      :operator or}
     {:numb 4
@@ -42,11 +42,11 @@
      :cons [\a \c]
      :operator or}
     {:numb 5
-     :ante [[\p \q] [] []]
+     :ante [[\p \q]]
      :cons [\n \s]
      :operator or}
     {:numb 6
-     :ante [[\u \v] [] []]
+     :ante [[\u \v]]
      :cons [\k \i]
      :operator or}))
 
