@@ -35,6 +35,14 @@
     (and log? (print "\nFact" (utils/intvec-to-char fact) "in memory? -" fact-in-wm))
     fact-in-wm))
 
+;; Returns the logical operator function equivalent in clojure
+(defn get-operator
+  [goal]
+  (let [operator (:operator (first (match goal false)))]
+    (if (= operator "∧")
+      every?
+      some)))
+
 (defn prove
   [goal]
   ;; traverse the tree in tail call-recursive manner
@@ -71,7 +79,7 @@
       (if (or true-fact (empty? queue))
         (if (= goal subgoal) ;; If we are at root node with no more rules (i.e. empty queue), test for success
           ;; Is every/any antecedent for goal node satisfied?
-          (if (every? true? (map #(fact-in-wm? % memory true) (select antecedents '())))
+          (if ((get-operator goal) true? (map #(fact-in-wm? % memory true) (select antecedents '())))
             (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.")
             (print "\n\nNo more rules found for goal =>" (utils/intvec-to-char goal) "is not true."))
 
