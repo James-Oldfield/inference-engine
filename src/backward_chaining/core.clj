@@ -58,49 +58,49 @@
          frontier []
          prnts []
          visited []
+         backtrack 0
          memory rules/wm-as-int]
 
     (print "\n\nCurrent subgoal -" (intvec-to-char subgoal))
-    (print "\nWorking memory -" (intvec-to-char memory))
+    (print "\nWorking memory -" (set (intvec-to-char memory)))
     (print "\nParent nodes -" (intvec-to-char prnts))
-    (print "\nVisited -" (intvec-to-char  visited))
     (print "\nFrontier" (intvec-to-char frontier))
 
-    ;; If current subgoal is found in memory, recur with next goal in frontier as new subgoal
     (if (fact-in-wm? subgoal memory)
-      (if (= goal subgoal)
-        (print "\n\n-----GOAL FOUND-----\n\n")
-
-        (recur (if (empty? frontier)  ;; if frontier is empty, backtrack to root node
-                 goal                 ;; i.e `goal` is new subgoal
-                 (first frontier))    ;; else expand next leaf node
-               (rest frontier)        ;; rest of the frontier is kept the same
-               (conj prnts subgoal)   ;; old subgoal is a new parent of new subgoal
-               (conj visited subgoal) ;; we've also now 'visited' `subgoal`
-               (if (empty? frontier)
-                 (seq (set (concat prnts memory))) ;; last frontier element being true => all parent facts are true so append them to the memory
-                 memory)))
+      (recur (first prnts)           ;; Start backtracking—most recent parent
+             []                     ;; Reset frontier
+             (rest prnts)        ;; Remove new subgoal from parents
+             (conj visited subgoal) ;; we've also now visited this `subgoal`
+             1
+             (if backtrack (concat (seq [subgoal]) memory) memory))
 
       (let [rules (match subgoal)               ;; match all rules concerning this subgoal
             antecedents (match-antes rules)     ;; match the rules to relevant antecedents
             queue (select antecedents visited)] ;; promote new subgoals we haven't visited
+
         (print "\nNew queue for expanded leaf node -" (intvec-to-char queue))
 
         (if (empty? queue)
-          (if (= goal subgoal)
-            (print "\nNo more rules found for goal =>" goal "is not true.")
+          (if (= goal subgoal)                               ;; If we are at root node with no more rules, test for success
+            (if (every? true? (map #(fact-in-wm? % memory) ;; Is every antecedent for goal node satisfied?
+                                   (select antecedents '())))
+              (print "\n\nAll antecedents satisfied." (intvec-to-char goal) "is true.")
+              (print "\n\nNo more rules found for goal =>" (intvec-to-char goal) "is not true."))
+
             ;; If we're not at root node, backtrack to last element of parent nodes
-            (recur (last prnts)           ;; Start backtracking—most recent parent
+            (recur (first prnts)           ;; Start backtracking—most recent parent
                    []                     ;; Reset frontier
-                   (butlast prnts)        ;; Remove new subgoal from parents
+                   (rest prnts)        ;; Remove new subgoal from parents
                    (conj visited subgoal) ;; we've also now visited this `subgoal`
-                   memory))
+                   1
+                   (if backtrack (concat (seq [subgoal]) memory) memory)))
 
           ;; else carry on picking facts off this branch
           (recur (first queue)                  ;; take top of queue as new subgoal
                  (concat frontier (rest queue)) ;; queue takes priority over frontier, as depth first
                  (conj prnts subgoal)           ;; subgoal is now the most recent parent
                  (conj visited subgoal)         ;; we've also now visisted `subgoal`
+                 0
                  memory))))))
 
 (defn -main
