@@ -25,8 +25,14 @@
     (print "\nMatched rules for goal:" (intvec-to-char goal) "-" (map :numb matching-rules))
     matching-rules))
 
+;; Given matched rules, returns antecedents that need to be next proven
+;; i.e. (promoted as subgoals)
+(defn match-antes
+  [rules]
+  (apply concat (map :ante rules)))
+
 ;; filter the matched rules' antecedents if they're contained in `visited` collection
-;; this becomes our new frontier we expand in either depth/breadth-first manner
+;; this becomes our new frontier we expand in depth-first manner
 (defn select
   [antecedents visited]
   (filter (fn [a]
@@ -57,7 +63,7 @@
     (print "\n\nCurrent subgoal -" (intvec-to-char subgoal))
     (print "\nWorking memory -" (intvec-to-char memory))
     (print "\nParent nodes -" (intvec-to-char prnts))
-    (print "\nVisited -" (intvec-to-char (set visited)))
+    (print "\nVisited -" (intvec-to-char  visited))
     (print "\nFrontier" (intvec-to-char frontier))
 
     ;; If current subgoal is found in memory, recur with next goal in frontier as new subgoal
@@ -75,10 +81,9 @@
                  (seq (set (concat prnts memory))) ;; last frontier element being true => all parent facts are true so append them to the memory
                  memory)))
 
-      (let [rules (match subgoal)                        ;; get all rules concerning this subgoal
-            antecedents (apply concat (map :ante rules)) ;; map the rules to relevant antecedents
-            queue (select antecedents visited)]          ;; get the antecedents of matching rules that we *haven't* visited
-
+      (let [rules (match subgoal)               ;; match all rules concerning this subgoal
+            antecedents (match-antes rules)     ;; match the rules to relevant antecedents
+            queue (select antecedents visited)] ;; promote new subgoals we haven't visited
         (print "\nNew queue for expanded leaf node -" (intvec-to-char queue))
 
         (if (empty? queue)
