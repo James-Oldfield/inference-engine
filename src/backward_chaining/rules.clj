@@ -1,20 +1,5 @@
-(ns backward-chaining.rules)
-
-;; maps consequents of rules to int format
-;; :return: the rules
-(defn cons-to-int
-  [rs]
-  (map (fn [rule]
-         (update rule :cons (fn [c] (map int c))))
-       rs))
-
-;; maps antecedents of rules to int format
-;; :return: the rules
-(defn ants-to-int
-  [rs]
-  (map (fn [rule]
-         (update rule :ante (fn [a] (partition 2 (map int (flatten a))))))
-       rs))
+(ns backward-chaining.rules
+  (:require [backward-chaining.utils :as utils]))
 
 ;; ----------------------
 ;; Modify initial working memory and rule base below (casted to ints implicitly):
@@ -77,5 +62,5 @@
   (partition 2 (map int (flatten wm))))
 
 ;; Parse rules as integers for more efficient comparison
-(def as-ints (cons-to-int
-               (ants-to-int base)))
+(def as-ints (utils/cons-to-int
+               (utils/ants-to-int base)))

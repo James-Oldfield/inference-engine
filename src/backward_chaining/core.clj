@@ -1,18 +1,7 @@
 (ns backward-chaining.core
   (:require [backward-chaining.rules :as rules])
+  (:require [backward-chaining.utils :as utils])
   (:gen-class))
-
-;; ----------------------
-;; Helper functions to operate on datastructures
-;; ----------------------
-
-;; complement of empty
-(def not-empty? (complement empty?))
-
-;; parses ints as chars, useful when printing to display progress
-(defn intvec-to-char
-  [v]
-  (partition 2 (map char (flatten v))))
 
 ;; :return: a lazySeq of rules whose consequents contain the goal symbol
 ;; N.B. each rule may contain many antecedents (i.e. nested seq)
@@ -22,7 +11,7 @@
         (filter (fn [rule]
                   (= (get rule :cons) goal))
                 rules/as-ints)]
-    (and log? (print "\nMatched rules for goal:" (intvec-to-char goal) "-" (map :numb matching-rules)))
+    (and log? (print "\nMatched rules for goal:" (utils/intvec-to-char goal) "-" (map :numb matching-rules)))
     matching-rules))
 
 ;; Given matched rules, returns antecedents that need to be next proven
@@ -43,7 +32,7 @@
 (defn fact-in-wm?
   [fact memory log?]
   (let [fact-in-wm (.contains memory fact)]
-    (and log? (print "\nFact" (intvec-to-char fact) "in memory? -" fact-in-wm))
+    (and log? (print "\nFact" (utils/intvec-to-char fact) "in memory? -" fact-in-wm))
     fact-in-wm))
 
 (defn prove
@@ -64,11 +53,11 @@
 
     ;; LOG PROGRESS
     (if backtrack
-      (print "\nBacktracking to" (intvec-to-char subgoal) "...\n")
+      (print "\nBacktracking to" (utils/intvec-to-char subgoal) "...\n")
       (do
-        (print "\n\nCurrent subgoal -" (intvec-to-char subgoal))
-        (print "\nWorking memory -" (set (intvec-to-char memory)))
-        (print "\nFrontier" (intvec-to-char frontier))))
+        (print "\n\nCurrent subgoal -" (utils/intvec-to-char subgoal))
+        (print "\nWorking memory -" (set (utils/intvec-to-char memory)))
+        (print "\nFrontier" (utils/intvec-to-char frontier))))
     ;; END LOG
 
     (let [rules (match subgoal (not backtrack)) ;; match all rules concerning this subgoal
@@ -76,15 +65,15 @@
           queue (select antecedents visited)    ;; promote new subgoals we haven't visited
           true-fact (fact-in-wm? subgoal memory (not backtrack))]
 
-      (if (not backtrack) (print "\nNew queue for expanded leaf node -" (intvec-to-char queue)))
+      (if (not backtrack) (print "\nNew queue for expanded leaf node -" (utils/intvec-to-char queue)))
 
       ;; check for end of branch
       (if (or true-fact (empty? queue))
         (if (= goal subgoal) ;; If we are at root node with no more rules (i.e. empty queue), test for success
           ;; Is every/any antecedent for goal node satisfied?
           (if (every? true? (map #(fact-in-wm? % memory true) (select antecedents '())))
-            (print "\n\nRequisite antecedents satisfied." (intvec-to-char goal) "is true.")
-            (print "\n\nNo more rules found for goal =>" (intvec-to-char goal) "is not true."))
+            (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.")
+            (print "\n\nNo more rules found for goal =>" (utils/intvec-to-char goal) "is not true."))
 
           (recur (first prnts)          ;; Start backtracking—most recent parent
                  []                     ;; Reset frontier
@@ -101,8 +90,8 @@
                (rest queue)           ;; push rest of queue to the frontier 
                (conj prnts subgoal)   ;; subgoal is now the most recent parent
                (conj visited subgoal) ;; we've also now visisted `subgoal`
-               false
-               memory)))))
+               false                  ;; no backtracking this recur
+               memory)))))            ;; memory remains unmodified
 
 (defn -main
   "Takes a goal and runs it through inference engine"
