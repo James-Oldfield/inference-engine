@@ -28,17 +28,17 @@
   '(
     ;; UNCOMMENT TO DEMO ARBITRARY RULES CAPABILITY
     ; {:numb 100
-    ;  :ante [[\x \x] [\l \l] [\o \o] [\a \a]]
+    ;  :ante [[\x \x]]
     ;  :cons [\b \g]
-    ;  :operator or}
+    ;  :operator and}
     ; {:numb 101
     ;  :ante [[\y \y]]
     ;  :cons [\x \x]
-    ;  :operator or}
+    ;  :operator and}
     ; {:numb 102
     ;  :ante [[\z \z]]
     ;  :cons [\y \y]
-    ;  :operator or}
+     ; :operator and}
     ;; END EXTRA DEMO
 
     {:numb 1
