@@ -61,11 +61,12 @@
 
     ;; LOG PROGRESS
     (if backtrack
-      (print "\nBacktracking to" (utils/intvec-to-char subgoal) "...\n")
+      (print "\nBacktracking to" (utils/intvec-to-char subgoal) "...")
       (do
         (print "\n\nCurrent subgoal -" (utils/intvec-to-char subgoal))
-        (print "\nWorking memory -" (set (utils/intvec-to-char memory)))
         (print "\nFrontier" (utils/intvec-to-char frontier))))
+
+    (print "\nWorking memory -" (set (utils/intvec-to-char memory)) "\n")
     ;; END LOG
 
     (let [rules (match subgoal (not backtrack)) ;; match all rules concerning this subgoal
