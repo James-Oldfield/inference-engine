@@ -26,20 +26,20 @@
 ;; :operator - relationship between 
 (def base
   '(
-    ;; Test dead end rules
+    ;; UNCOMMENT TO DEMO ARBITRARY RULES CAPABILITY
     ; {:numb 100
-    ;  :ante ["x x" "l l"]
-    ;  :cons ["b g"]
+    ;  :ante [[\x \x] [\l \l] [\o \o] [\a \a]]
+    ;  :cons [\b \g]
     ;  :operator or}
     ; {:numb 101
-    ;  :ante ["y y"]
-    ;  :cons ["x x"]
+    ;  :ante [[\y \y]]
+    ;  :cons [\x \x]
     ;  :operator or}
     ; {:numb 102
-    ;  :ante ["z z"]
-    ;  :cons ["y y"]
+    ;  :ante [[\z \z]]
+    ;  :cons [\y \y]
     ;  :operator or}
-    ;; End Test dead end rules
+    ;; END EXTRA DEMO
 
     {:numb 1
      :ante [[\f \h] [\a \c]]
