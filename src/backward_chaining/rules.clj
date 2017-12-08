@@ -15,41 +15,41 @@
     ; {:numb 100
     ;  :ante [[\x \x]]
     ;  :cons [\b \g]
-    ;  :operator and}
+    ;  :operator "∧"}
     ; {:numb 101
     ;  :ante [[\y \y]]
     ;  :cons [\x \x]
-    ;  :operator and}
+    ;  :operator "∧"}
     ; {:numb 102
     ;  :ante [[\z \z]]
     ;  :cons [\y \y]
-     ; :operator and}
+     ; :operator "∧"}
     ;; END EXTRA DEMO
 
     {:numb 1
      :ante [[\f \h] [\a \c]]
      :cons [\b \g]
-     :operator and}
+     :operator "∧"}
     {:numb 2
      :ante [[\n \s]]
      :cons [\e \m]
-     :operator and}
+     :operator "∧"}
     {:numb 3
      :ante [[\r \t]]
      :cons [\p \q]
-     :operator and}
+     :operator "∧"}
     {:numb 4
      :ante [[\d \j] [\e \m] [\k \i]]
      :cons [\a \c]
-     :operator and}
+     :operator "∧"}
     {:numb 5
      :ante [[\p \q]]
      :cons [\n \s]
-     :operator and}
+     :operator "∧"}
     {:numb 6
      :ante [[\u \v]]
      :cons [\k \i]
-     :operator and}))
+     :operator "∧"}))
 
 ;; initial working memory
 (def wm
