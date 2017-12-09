@@ -81,7 +81,7 @@
     (if backtrack
       (print "\nBacktracking to" (utils/intvec-to-char subgoal) "...")
       (do
-        (print "\n\nCurrent subgoal -" (utils/intvec-to-char subgoal))
+        (print "\nCurrent subgoal -" (utils/intvec-to-char subgoal))
         (print "\nFrontier" (utils/intvec-to-char frontier))))
 
     (print "\nWorking memory -" (set (utils/intvec-to-char memory)) "\n")
@@ -96,21 +96,21 @@
 
       ;; check for end of branch
       (if (or true-fact (empty? queue))
-        (if (= goal subgoal) ;; If we are at root node with no more rules (i.e. empty queue), test for success
-          ;; Is every/any antecedent for goal node satisfied?
-          (if ((get-operator goal) true? (map #(fact-in-wm? % memory true) (select antecedents '())))
-            (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.")
-            (print "\n\nNo more rules found for goal =>" (utils/intvec-to-char goal) "is not true."))
+        (let [rule-proven (rule-proven? (last visited) memory)]
+          (if (= goal subgoal)
+            (if rule-proven
+              (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.\n\n")
+              (print "\n\nNo more rules found for goal =>" (utils/intvec-to-char goal) "is not true.\n\n"))
 
-          (recur (first prnts)          ;; Start backtracking—most recent parent
-                 []                     ;; Reset frontier
-                 (rest prnts)           ;; Remove new subgoal from parents
-                 (conj visited subgoal) ;; we've also now visited this `subgoal`
-                 true                   ;; flag that we're backtracking
-                 ;; Child node being true => this node is true, provding queue is empty
-                 (if (and backtrack (fact-in-wm? (last visited) memory (not backtrack)))
-                   (concat (seq [subgoal]) memory)
-                   memory)))
+            (recur (first prnts)          ;; Start backtracking—most recent parent
+                   []                     ;; Reset frontier
+                   (rest prnts)           ;; Remove new subgoal from parents
+                   (conj visited subgoal) ;; we've also now visited this `subgoal`
+                   true                   ;; flag that we're backtracking
+                   ;; Child node being true => this node is true, provding queue is empty
+                   (if (and backtrack (fact-in-wm? (last visited) memory (not backtrack)))
+                     (concat (seq [subgoal]) memory)
+                     memory))))
 
         ;; else carry on picking facts off this branch
         (recur (first queue)          ;; take top of queue as new subgoal
