@@ -35,13 +35,31 @@
     (and log? (print "\nFact" (utils/intvec-to-char fact) "in memory? -" fact-in-wm))
     fact-in-wm))
 
-;; Returns the logical operator function equivalent in clojure
+;; Returns the logical operator function equivalent in clojure for a rule
 (defn get-operator
-  [goal]
-  (let [operator (:operator (first (match goal false)))]
+  [rule]
+  (let [operator (:operator rule)]
     (if (= operator "∧")
       every?
       some)))
+
+;; gets first rule for current subgoal, by antecedent
+(defn get-rule
+  [antecedent]
+  (first (filter (fn [rule]
+                   (.contains (get rule :ante) antecedent))
+                 rules/as-ints)))
+
+;; return - bool
+(defn rule-proven?
+  [goal memory]
+  (let [rule (get-rule goal)
+        operator (get-operator rule)                           ;; Get the logical operator (all/any)
+        antes (map (fn [fact] (fact-in-wm? fact memory false)) ;; Map antecedents to seq of bools specifying if they're in memory
+                   (:ante rule))
+        rule-proven (operator true? antes)]                    ;; Use the rule's logical operator to test contents of `antes`
+    (if rule-proven (print "\n---- RULE" (:numb rule) "PROVEN ----"))
+    rule-proven))
 
 (defn prove
   [goal]
