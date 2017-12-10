@@ -93,7 +93,7 @@
         (print "\nCurrent subgoal -" (utils/intvec-to-char subgoal))
         (print "\nFrontier" (utils/intvec-to-char frontier))))
 
-    (print "\nWorking memory -" (set (utils/intvec-to-char memory)) "\n")
+    (print "\nWorking memory -" (utils/intvec-to-char memory) "\n")
     ;; END LOG
 
     (let [rules (match subgoal (not backtrack)) ;; match all rules concerning this subgoal
