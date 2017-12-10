@@ -34,7 +34,8 @@
   [fact old-memory add?]
   (let [operator (if add? concat remove)
         new-memory (operator (seq [fact]) old-memory)]
-    (print "\nActing... " (if add? "adding" "removing") " fact(s)" (utils/intvec-to-char fact) "to memory")
+    (print "\nActing... " (if add? "adding" "removing") " fact(s)" (utils/intvec-to-char fact) "to memory -"
+           (utils/intvec-to-char new-memory))
     new-memory))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
@@ -90,10 +91,8 @@
     (if backtrack
       (print "\nBacktracking to" (utils/intvec-to-char subgoal) "...")
       (do
-        (print "\nCurrent subgoal -" (utils/intvec-to-char subgoal))
+        (print "\n\nCurrent subgoal -" (utils/intvec-to-char subgoal))
         (print "\nFrontier" (utils/intvec-to-char frontier))))
-
-    (print "\nWorking memory -" (utils/intvec-to-char memory) "\n")
     ;; END LOG
 
     (let [rules (match subgoal (not backtrack)) ;; match all rules concerning this subgoal
