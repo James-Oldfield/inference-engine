@@ -15,7 +15,7 @@
     ; {:numb 100
     ;  :ante [[\x \x]]
     ;  :cons [\b \g]
-    ;  :operator "∧"}
+    ;  :operator "∨"}
     ; {:numb 101
     ;  :ante [[\y \y]]
     ;  :cons [\x \x]
