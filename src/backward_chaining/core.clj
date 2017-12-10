@@ -28,11 +28,13 @@
             (not (.contains visited a)))
           antecedents))
 
-;; Adds a proven fact(s) to memory when rule fires
+;; Adds/removes proven fact(s) to memory when rule fires
+;; call as (act x x false) to act to remove from memory
 (defn act
-  [subgoal old-memory]
-  (let [new-memory (concat (seq [subgoal]) old-memory)]
-    (print "\nActing... adding fact(s)" (utils/intvec-to-char subgoal) "to memory")
+  [fact old-memory add?]
+  (let [operator (if add? concat remove)
+        new-memory (operator (seq [fact]) old-memory)]
+    (print "\nActing... " (if add? "adding" "removing") " fact(s)" (utils/intvec-to-char fact) "to memory")
     new-memory))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
@@ -106,7 +108,7 @@
         (let [rule-proven (rule-proven? (last visited) memory)]
           (if (= goal subgoal)
             (if rule-proven
-              (do (act goal memory) (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.\n\n"))
+              (do (act goal memory true) (print "\n\nRequisite antecedents satisfied." (utils/intvec-to-char goal) "is true.\n\n"))
               (print "\n\nNo more rules found for goal =>" (utils/intvec-to-char goal) "is not true.\n\n"))
 
             (recur (first prnts)          ;; Start backtracking—most recent parent
@@ -116,7 +118,7 @@
                    true                   ;; flag that we're backtracking
                    ;; Child node being true => this node is true, provding queue is empty
                    (if (and backtrack (fact-in-wm? (last visited) memory (not backtrack)))
-                     (act subgoal memory)
+                     (act subgoal memory true)
                      memory))))
 
         ;; else carry on picking facts off this branch
