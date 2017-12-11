@@ -14,9 +14,9 @@
     (and log? (print "\nMatched rules for goal:" (utils/intvec-to-char goal) "-" (map :numb matching-rules)))
     matching-rules))
 
-;; Given matched rules, returns antecedents that need to be next proven
+;; Given selected rules, returns antecedents that need to be next proven
 ;; i.e. (promoted as subgoals)
-(defn match-antes
+(defn get-antes
   [rules]
   (apply concat (map :ante rules)))
 
@@ -39,11 +39,11 @@
     new-memory))
 
 ;; :return: a boolean specifying whether the goal is in the working memory
-(defn fact-in-wm?
-  [fact memory log?]
-  (let [fact-in-wm (.contains memory fact)]
-    (and log? (print "\nFact" (utils/intvec-to-char fact) "in memory? -" fact-in-wm))
-    fact-in-wm))
+(defn match-in-wm?
+  [goal memory log?]
+  (let [goal-in-wm (.contains memory goal)]
+    (and log? (print "\nFact" (utils/intvec-to-char goal) "in memory? -" goal-in-wm))
+    goal-in-wm))
 
 ;; Returns the logical operator function equivalent in clojure for a rule
 (defn get-operator
@@ -64,10 +64,10 @@
 (defn rule-proven?
   [goal memory]
   (let [rule (get-rule goal)
-        operator (get-operator rule)                           ;; Get the logical operator (all/any)
-        antes (map (fn [fact] (fact-in-wm? fact memory false)) ;; Map antecedents to seq of bools specifying if they're in memory
+        operator (get-operator rule)                            ;; Get the logical operator (all/any)
+        antes (map (fn [fact] (match-in-wm? fact memory false)) ;; Map antecedents to seq of bools specifying if they're in memory
                    (:ante rule))
-        rule-proven (operator true? antes)]                    ;; Use the rule's logical operator to test contents of `antes`
+        rule-proven (operator true? antes)]                     ;; Use the rule's logical operator to test contents of `antes`
     (if rule-proven (print "\n---- RULE" (:numb rule) "PROVEN ----"))
     rule-proven))
 
@@ -96,9 +96,9 @@
     ;; END LOG
 
     (let [rules (match subgoal (not backtrack)) ;; match all rules concerning this subgoal
-          antecedents (match-antes rules)       ;; match the rules to relevant antecedents
+          antecedents (get-antes rules)         ;; get antecedents of relevant rules
           queue (select antecedents visited)    ;; promote new subgoals we haven't visited
-          true-fact (fact-in-wm? subgoal memory (not backtrack))]
+          true-fact (match-in-wm? subgoal memory (not backtrack))]
 
       (if (not backtrack) (print "\nNew queue for expanded leaf node -" (utils/intvec-to-char queue)))
 
@@ -116,13 +116,13 @@
                    (conj visited subgoal) ;; we've also now visited this `subgoal`
                    true                   ;; flag that we're backtracking
                    ;; Child node being true => this node is true, provding queue is empty
-                   (if (and backtrack (fact-in-wm? (last visited) memory (not backtrack)))
+                   (if (and backtrack (match-in-wm? (last visited) memory (not backtrack)))
                      (act subgoal memory true)
                      memory))))
 
         ;; else carry on picking facts off this branch
         (recur (first queue)          ;; take top of queue as new subgoal
-               (rest queue)           ;; push rest of queue to the frontier 
+               (rest queue)           ;; push rest of queue to the frontier
                (conj prnts subgoal)   ;; subgoal is now the most recent parent
                (conj visited subgoal) ;; we've also now visisted `subgoal`
                false                  ;; no backtracking this recur
