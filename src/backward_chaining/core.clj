@@ -3,9 +3,15 @@
   (:require [backward-chaining.utils :as utils])
   (:gen-class))
 
-;; :return: a lazySeq of rules whose consequents contain the goal symbol
-;; N.B. each rule may contain many antecedents (i.e. nested seq)
+;; --------------
+;; CORE FUNCTIONS
+;; --------------
+
 (defn match
+  "Match supplied goal with rules whose consequents contain goal symbol.
+  :param goal: sequence - target goal.
+  :param log?: boolean - flag to print out info.
+  :return: sequence - rules whose consequents contain the goal symbol."
   [goal log?]
   (let [matching-rules
         (filter (fn [rule]
@@ -14,23 +20,33 @@
     (and log? (print "\nMatched rules for goal:" (utils/intvec-to-char goal) "-" (map :numb matching-rules)))
     matching-rules))
 
-;; Given selected rules, returns antecedents that need to be next proven
-;; i.e. (promoted as subgoals)
-(defn get-antes
-  [rules]
-  (apply concat (map :ante rules)))
+(defn match-in-wm?
+  "Match goal with WM to check for its existence there.
+  :param goal: sequence - target goal.
+  :param memory: sequence - current state of working memory.
+  :param log?: boolean - flag to print out info.
+  :return: boolean - specify whether the goal is in the working memory."
+  [goal memory log?]
+  (let [goal-in-wm (.contains memory goal)]
+    (and log? (print "\nFact" (utils/intvec-to-char goal) "in memory? -" goal-in-wm))
+    goal-in-wm))
 
-;; filter the matched rules' antecedents if they're contained in `visited` collection
-;; this becomes our new frontier we expand in depth-first manner
 (defn select
+  "Filter the matched rules' antecedents if we've already visited its nodes.
+  :param antecedents: sequence - antecedents of a rule selected in DFS manner
+  :param visited: sequence - already-visited antecedents.
+  :return: sequence - non-visited antecedents of selected rule."
   [antecedents visited]
   (filter (fn [a]
             (not (.contains visited a)))
           antecedents))
 
-;; Adds/removes proven fact(s) to memory when rule fires
-;; call as (act x x false) to act to remove from memory
 (defn act
+  "Adds/removes proven fact(s) to memory when rule fires
+  :param fact: sequence - facts to be acted upon.
+  :param old-memory: sequence - current state of working memory.
+  :param add?: boolean - specifies whether to add or remove fact from wm.
+  :return: sequence - new modified working memory with fact removed/added."
   [fact old-memory add?]
   (let [operator (if add? concat remove)
         new-memory (operator (seq [fact]) old-memory)]
@@ -38,30 +54,38 @@
            (utils/intvec-to-char new-memory))
     new-memory))
 
-;; :return: a boolean specifying whether the goal is in the working memory
-(defn match-in-wm?
-  [goal memory log?]
-  (let [goal-in-wm (.contains memory goal)]
-    (and log? (print "\nFact" (utils/intvec-to-char goal) "in memory? -" goal-in-wm))
-    goal-in-wm))
+;; -------
+;; GETTERS
+;; -------
 
-;; Returns the logical operator function equivalent in clojure for a rule
+(defn get-antes
+  "Given selected rules, returns antecedents that need to be next proven i.e. (promoted as subgoals).
+  :param rules: sequence - currently selected rules
+  :return: sequence - new modified working memory with fact removed  /added"
+  [rules]
+  (apply concat (map :ante rules)))
+
 (defn get-operator
+  ":param rule: map - rule to act upon.
+  :return: function - the logical operator function equivalent in clojure for a rule."
   [rule]
   (let [operator (:operator rule)]
     (if (= operator "∧")
       every?
       some)))
 
-;; gets first rule for current subgoal, by antecedent
 (defn get-rule
+  ":param antecedent: sequence - selected antecedent(s).
+  :return: sequence - first rule for current subgoal, by antecedent."
   [antecedent]
   (first (filter (fn [rule]
                    (.contains (get rule :ante) antecedent))
                  rules/as-ints)))
 
-;; return - bool
 (defn rule-proven?
+  ":param goal: sequence - selected (sub)goal.
+  :param memory: sequence - current state of wm.
+  :return: boolean - has the rule been proven with current state of wm?"
   [goal memory]
   (let [rule (get-rule goal)
         operator (get-operator rule)                            ;; Get the logical operator (all/any)
@@ -71,15 +95,19 @@
     (if rule-proven (print "\n---- RULE" (:numb rule) "PROVEN ----"))
     rule-proven))
 
+;; --------------
+;; MAIN INTERFACE
+;; --------------
+
 (defn prove
   [goal]
-  ;; traverse the tree in tail call-recursive manner
-  ;; :subgoal   - single symbol to be proven
-  ;; :frontier  - list of non-immediate symbols to be proven
-  ;; :prnts     - list of parent symbols which the subgoal implies
-  ;; :visited   - already-traversed nodes
-  ;; :backtrack - boolean flag, are we backtracking?
-  ;; :wm        - current state of working memory
+  "Traverse the tree in tail call-recursive manner.
+  :param subgoal:   - single symbol to be proven.
+  :param frontier:  - list of non-immediate symbols to be proven.
+  :param prnts:     - list of parent symbols which the subgoal implies.
+  :param visited:   - already-traversed nodes.
+  :param backtrack: - boolean flag, are we backtracking?
+  :param wm:        - current state of working memory."
   (loop [subgoal goal
          frontier []
          prnts []
